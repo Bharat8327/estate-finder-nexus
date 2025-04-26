@@ -1,11 +1,10 @@
-
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Image, MapPin, Phone, Calendar, User, Clock } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   id: string;
@@ -68,6 +67,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   
   const { toast } = useToast();
 
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
   const handleSendMessage = () => {
     if (message.trim()) {
       const newMessage: Message = {
@@ -81,13 +82,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({
       setMessages([...messages, newMessage]);
       setMessage("");
       
-      // Show toast notification
       toast({
         title: "Message sent",
         description: "Your message has been sent successfully.",
       });
 
-      // Simulate a reply after a short delay
       setTimeout(() => {
         const reply: Message = {
           id: (Date.now() + 1).toString(),
@@ -129,7 +128,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     }
   };
   
-  // Group messages by date
   const groupedMessages = messages.reduce((groups: {date: string; messages: Message[]}[], message) => {
     const messageDate = formatDate(message.timestamp);
     const existingGroup = groups.find(group => group.date === messageDate);
@@ -146,9 +144,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     return groups;
   }, []);
 
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   return (
     <div className="flex flex-col bg-white rounded-lg shadow overflow-hidden h-full">
-      {/* Chat Header */}
       <div className="border-b p-3 flex items-center justify-between bg-gray-50">
         <div className="flex items-center">
           <div className="relative">
@@ -185,7 +186,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
         </div>
       </div>
       
-      {/* Property Info Bar */}
       {propertyTitle && (
         <div className="bg-gray-50 p-2 flex items-center justify-between border-b">
           <div className="flex items-center text-sm">
@@ -199,8 +199,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
         </div>
       )}
 
-      {/* Chat Messages */}
-      <ScrollArea className="flex-1 p-4 bg-gray-50">
+      <ScrollArea className="flex-1 p-4 bg-gray-50 overflow-y-auto max-h-[calc(100vh-300px)]">
         <div className="space-y-6">
           {groupedMessages.map((group, groupIndex) => (
             <div key={groupIndex} className="space-y-3">
@@ -260,21 +259,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({
               ))}
             </div>
           ))}
-        </div>
-        
-        {/* Typing Indicator (optional) */}
-        <div className="flex items-center mt-2 pl-10 animate-pulse">
-          {/* Uncomment to show typing indicator */}
-          {/* <div className="flex gap-1">
-            <div className="w-2 h-2 rounded-full bg-gray-400"></div>
-            <div className="w-2 h-2 rounded-full bg-gray-400 animation-delay-100"></div>
-            <div className="w-2 h-2 rounded-full bg-gray-400 animation-delay-200"></div>
-          </div>
-          <span className="text-xs text-gray-500 ml-2">{recipientName} is typing...</span> */}
+          <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
 
-      {/* Attachment Preview */}
       {attachment && (
         <div className="bg-gray-50 p-2 border-t flex items-center justify-between">
           <div className="flex items-center">
@@ -289,7 +277,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
         </div>
       )}
 
-      {/* Message Input */}
       <div className="border-t p-3 bg-white">
         <div className="flex items-end gap-2">
           <Textarea
