@@ -5,6 +5,8 @@ import Footer from "@/components/Footer";
 import ChatBox from "@/components/ChatBox";
 import { Search, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 // Sample chat contacts data
 const chatContacts = [
@@ -83,7 +85,7 @@ const Messages = () => {
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-3 h-[calc(100vh-250px)]">
               {/* Contacts List */}
-              <div className="border-r">
+              <div className="border-r flex flex-col h-full">
                 <div className="p-4 border-b">
                   <div className="relative">
                     <Input
@@ -97,7 +99,7 @@ const Messages = () => {
                   </div>
                 </div>
                 
-                <div className="overflow-y-auto h-[calc(100%-72px)]">
+                <ScrollArea className="flex-1">
                   {filteredContacts.map(contact => (
                     <div
                       key={contact.id}
@@ -108,13 +110,10 @@ const Messages = () => {
                     >
                       <div className="flex items-start gap-3">
                         <div className="relative">
-                          <div className="w-12 h-12 rounded-full overflow-hidden">
-                            <img
-                              src={contact.avatar}
-                              alt={contact.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
+                          <Avatar className="w-12 h-12">
+                            <AvatarImage src={contact.avatar} alt={contact.name} />
+                            <AvatarFallback>{contact.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
                           {contact.unread && (
                             <span className="absolute top-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-white"></span>
                           )}
@@ -148,7 +147,7 @@ const Messages = () => {
                       No conversations found
                     </div>
                   )}
-                </div>
+                </ScrollArea>
               </div>
               
               {/* Chat Area */}
